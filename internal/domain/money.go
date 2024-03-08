@@ -12,8 +12,8 @@ type DecimalMoney struct {
 	amount decimal.Decimal
 }
 
-func NewDecimalMoney() DecimalMoney {
-	return DecimalMoney{}
+func NewDecimalMoney() *DecimalMoney {
+	return &DecimalMoney{}
 }
 
 const defaultPrecision = 2

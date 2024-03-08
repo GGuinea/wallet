@@ -1,35 +1,38 @@
 package app
 
 import (
+	"main/internal/domain"
 	"main/internal/ports"
+	"main/pkg"
 )
 
-type WalletService interface {
-	Deposit(walletID string, amount string) error
-	Withdraw(walletID string, amount string) error
-	GetBalance(walletID string) (string, error)
-}
-
-type walletService struct {
+type basicWalletService struct {
 	walletRepo ports.WalletRepository
-	entryRepo  ports.EntryRepository
+	idGen      pkg.UUIDGenerator
 }
 
-func NewWalletService(walletRepo ports.WalletRepository, entryRepo ports.EntryRepository) WalletService {
-	return walletService{
+func NewWalletService(walletRepo ports.WalletRepository, idGen pkg.UUIDGenerator) basicWalletService {
+	return basicWalletService{
 		walletRepo: walletRepo,
-		entryRepo:  entryRepo,
+		idGen:      idGen,
 	}
 }
 
-func (s walletService) Deposit(walletID string, amount string) error {
+func (s *basicWalletService) NewWallet() *domain.Wallet {
+	return &domain.Wallet{
+		ID:      s.idGen.Generate(),
+		Balance: domain.NewDecimalMoney(),
+	}
+}
+
+func (s *basicWalletService) Deposit(walletID string, amount string) error {
 	return nil
 }
 
-func (s walletService) Withdraw(walletID string, amount string) error {
+func (s *basicWalletService) Withdraw(walletID string, amount string) error {
 	return nil
 }
 
-func (s walletService) GetBalance(walletID string) (string, error) {
+func (s *basicWalletService) GetBalance(walletID string) (string, error) {
 	return "", nil
 }

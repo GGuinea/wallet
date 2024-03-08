@@ -3,6 +3,8 @@ package ports
 import "main/internal/domain"
 
 type WalletRepository interface {
-	GetByID(id string) (*domain.Wallet, error)
-	UpdateBalance(wallet *domain.Wallet) error
+	GetWalletByID(id string) (*domain.Wallet, error)
+	SaveWallet(wallet *domain.Wallet) error
+	UpdateWalletBalance(wallet *domain.Wallet, entry *domain.Entry) error
+	GetEntriesByWalletID(walletID string) ([]*domain.Entry, error)
 }
