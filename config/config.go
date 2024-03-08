@@ -16,7 +16,7 @@ func buildDbconfig() *DbConfig {
 		Port:     "5432",
 		User:     "postgres",
 		Password: "postgres",
-		DbName:   "wallets",
+		DbName:   "postgres",
 	}
 }
 

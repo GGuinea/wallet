@@ -2,12 +2,10 @@ package internal
 
 import (
 	"context"
-	"fmt"
 	"main/config"
 	"main/internal/adapters"
 	"main/internal/ports"
-
-	"github.com/jackc/pgx/v5/pgxpool"
+	"main/pkg/postgres/conn"
 )
 
 type CompositionRoot struct {
@@ -15,7 +13,7 @@ type CompositionRoot struct {
 }
 
 func NewCompositionRoot(cfg *config.Config) *CompositionRoot {
-	dbPool, err := getDbPool(context.Background(), cfg.DbConfig)
+	dbPool, err := conn.GetDbPool(context.Background(), cfg.DbConfig)
 	if err != nil {
 		panic(err)
 	}
@@ -31,12 +29,4 @@ func NewCompositionRoot(cfg *config.Config) *CompositionRoot {
 	return &CompositionRoot{
 		WalletRepository: posgresRepo,
 	}
-}
-
-func getDbPool(ctx context.Context, config *config.DbConfig) (*pgxpool.Pool, error) {
-	return pgxpool.New(ctx, buildConnectionString(config))
-}
-
-func buildConnectionString(dbConfig *config.DbConfig) string {
-	return fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable", dbConfig.User, dbConfig.Password, dbConfig.Host, dbConfig.Port, dbConfig.DbName)
 }
