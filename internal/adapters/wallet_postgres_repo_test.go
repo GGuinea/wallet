@@ -96,6 +96,52 @@ func (s *WalletPostgresRepoTestSuite) TestShouldUpdateWalletBalance() {
 	s.Equal(wallet.Balance, returnedWallet.Balance)
 }
 
+func (s *WalletPostgresRepoTestSuite) TestShouldReturnErrorWhenUpdateWalletBalanceWithNonExistingWallet() {
+	wallet := &entity.WalletEntity{
+		ID:      s.uuidGen.Generate(),
+		Balance: "0.00",
+	}
+
+	entryEntity := &entity.EntryEntity{
+		ID:           s.uuidGen.Generate(),
+		WalletID:     wallet.ID,
+		Type:         "DEPOSIT",
+		Amount:       "100.00",
+		BalanceAfter: "100.00",
+	}
+	err := s.walletRepo.UpdateWalletBalance(wallet, entryEntity)
+	s.NotNil(err)
+}
+
+func (s *WalletPostgresRepoTestSuite) TestShouldReturnEntriesByWalletID() {
+	wallet := &entity.WalletEntity{
+		ID:      s.uuidGen.Generate(),
+		Balance: "0.00",
+	}
+
+	err := s.walletRepo.SaveWallet(wallet)
+	s.Nil(err)
+
+	entryEntity := &entity.EntryEntity{
+		ID:           s.uuidGen.Generate(),
+		WalletID:     wallet.ID,
+		Type:         "DEPOSIT",
+		Amount:       "100.00",
+		BalanceAfter: "100.00",
+	}
+	err = s.walletRepo.UpdateWalletBalance(wallet, entryEntity)
+	s.Nil(err)
+
+	entries, err := s.walletRepo.GetEntriesByWalletID(wallet.ID)
+	s.Nil(err)
+	s.Len(entries, 1)
+	s.Equal(entryEntity.ID, entries[0].ID)
+	s.Equal(entryEntity.WalletID, entries[0].WalletID)
+	s.Equal(entryEntity.Type, entries[0].Type)
+	s.Equal(entryEntity.Amount, entries[0].Amount)
+	s.Equal(entryEntity.BalanceAfter, entries[0].BalanceAfter)
+}
+
 func TestWalletPostgresRepoTestSuite(t *testing.T) {
 	suite.Run(t, new(WalletPostgresRepoTestSuite))
 }
