@@ -8,6 +8,6 @@ import (
 type WalletRepository interface {
 	GetWalletByID(id string) (*entity.WalletEntity, error)
 	SaveWallet(wallet *entity.WalletEntity) error
-	UpdateWalletBalance(wallet *entity.WalletEntity, entry *domain.Entry) error
+	UpdateWalletBalance(wallet *entity.WalletEntity, entry *entity.EntryEntity) error
 	GetEntriesByWalletID(walletID string) ([]*domain.Entry, error)
 }

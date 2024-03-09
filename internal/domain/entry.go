@@ -8,6 +8,5 @@ type Entry struct {
 	Type         string
 	Amount       Money
 	BalanceAfter Money
-	Metadata     map[string]string
 	CreatedAt    time.Time
 }

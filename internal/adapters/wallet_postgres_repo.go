@@ -21,6 +21,8 @@ var insertWalletQuery = `INSERT INTO wallet (id, balance) VALUES ($1, $2)`
 
 var getWalletByIDQuery = `SELECT * FROM wallet WHERE id = $1`
 
+var insertEntryQuery = `INSERT INTO entry (id, wallet_id, op_type, amount, balance_after, created_at) VALUES ($1, $2, $3, $4, $5, $6)`
+
 func NewWalletPostgresRepo(deps *WalletPostgresRepoDeps) (*WalletPostgresRepo, error) {
 	if deps == nil {
 		return nil, fmt.Errorf("WalletPostgresRepoDeps is required")
@@ -68,14 +70,34 @@ func (wpr *WalletPostgresRepo) GetWalletByID(id string) (*entity.WalletEntity, e
 	return &wallet, nil
 }
 
-func (wpr *WalletPostgresRepo) UpdateWalletBalance(wallet *entity.WalletEntity, entry *domain.Entry) error {
+func (wpr *WalletPostgresRepo) UpdateWalletBalance(wallet *entity.WalletEntity, entry *entity.EntryEntity) error {
 	ctx := context.Background()
 	tx, err := wpr.ConnPool.Begin(ctx)
 	if err != nil {
 		return err
 	}
 
-	_, err = tx.Exec(ctx, `UPDATE wallet SET balance = $1 WHERE id = $2`, wallet.Balance, wallet.ID)
+	var savedWallet entity.WalletEntity
+	err = tx.QueryRow(ctx, getWalletByIDQuery, wallet.ID).Scan(&savedWallet.ID, &savedWallet.Balance, &savedWallet.CreatedAt, &savedWallet.UpdatedAt)
+
+	if err != nil {
+		tx.Rollback(ctx)
+		return err
+	}
+
+	res, err := tx.Exec(ctx, `UPDATE wallet SET balance = $1 WHERE id = $2 AND updated_at = $3 AND balance = $4`, wallet.Balance, wallet.ID, savedWallet.UpdatedAt, savedWallet.Balance)
+	if err != nil {
+		tx.Rollback(ctx)
+		return err
+	}
+
+	if res.RowsAffected() == 0 {
+		tx.Rollback(ctx)
+		return fmt.Errorf("wallet balance update failed")
+	}
+
+	_, err = tx.Exec(ctx, insertEntryQuery, entry.ID, entry.WalletID, entry.Type, entry.Amount, entry.BalanceAfter, entry.CreatedAt)
+
 	if err != nil {
 		tx.Rollback(ctx)
 		return err

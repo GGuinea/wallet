@@ -16,6 +16,7 @@ type WalletPostgresRepoTestSuite struct {
 }
 
 func (suite *WalletPostgresRepoTestSuite) SetupTest() {
+	testsutils.SetupDbForTests()
 	walletRepo, err := NewWalletPostgresRepo(&WalletPostgresRepoDeps{ConnPool: testsutils.GetDbPool()})
 	if err != nil {
 		suite.T().Fatal(err)
@@ -78,7 +79,15 @@ func (s *WalletPostgresRepoTestSuite) TestShouldUpdateWalletBalance() {
 	s.Nil(err)
 
 	wallet.Balance = "100.00"
-	err = s.walletRepo.UpdateWalletBalance(wallet, nil)
+
+	entryEntity := &entity.EntryEntity{
+		ID:           s.uuidGen.Generate(),
+		WalletID:     wallet.ID,
+		Type:         "DEPOSIT",
+		Amount:       "100.00",
+		BalanceAfter: "100.00",
+	}
+	err = s.walletRepo.UpdateWalletBalance(wallet, entryEntity)
 	s.Nil(err)
 
 	returnedWallet, err := s.walletRepo.GetWalletByID(wallet.ID)
