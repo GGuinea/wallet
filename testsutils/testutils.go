@@ -2,7 +2,6 @@ package testsutils
 
 import (
 	"context"
-	"fmt"
 	"main/config"
 	"main/pkg/postgres/migrations"
 
@@ -13,7 +12,6 @@ func GetDbPool() *pgxpool.Pool {
 	pgConnStr := "postgres://postgres:postgres@localhost:5432/postgres"
 	pool, err := pgxpool.New(context.Background(), pgConnStr)
 	if err != nil {
-		fmt.Println(err)
 		panic(err)
 	}
 	return pool
@@ -30,7 +28,6 @@ func SetupDbForTests() {
 	}
 	err := migrations.MigrateGlobal(context.Background(), testConfig)
 	if err != nil {
-		fmt.Println(err)
 		panic(err)
 	}
 }
