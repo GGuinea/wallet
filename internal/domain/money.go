@@ -6,6 +6,7 @@ type Money interface {
 	AddFromString(money string) error
 	SubtractFromString(money string) error
 	GetAsStringWithDefaultPrecision() string
+	IsGreaterEqualThanZero() bool
 	IsGreaterThanZero() bool
 }
 
@@ -49,6 +50,10 @@ func (m *DecimalMoney) GetAsStringWithDefaultPrecision() string {
 	return m.amount.StringFixedBank(defaultPrecision)
 }
 
-func (m *DecimalMoney) IsGreaterThanZero() bool {
+func (m *DecimalMoney) IsGreaterEqualThanZero() bool {
 	return !m.amount.IsNegative()
+}
+
+func (m *DecimalMoney) IsGreaterThanZero() bool {
+	return m.amount.IsPositive()
 }

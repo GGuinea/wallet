@@ -125,6 +125,37 @@ func TestShouldReturnPropertlyIfMoneyIsGreaterEqualThanZero(t *testing.T) {
 	for _, scenario := range scenarios {
 		t.Run(scenario.name, func(t *testing.T) {
 			m, _ := NewDecimalMoneyFromString(scenario.money)
+			assert.Equal(t, scenario.expectedResult, m.IsGreaterEqualThanZero(), scenario.name)
+		})
+	}
+}
+
+func TestShouldReturnPropertlyIfMoneyIsGreaterThanZero(t *testing.T) {
+	scenarios := []struct {
+		name           string
+		money          string
+		expectedResult bool
+	}{
+		{
+			name:           "Should return false for 0",
+			money:          "0.00",
+			expectedResult: false,
+		},
+		{
+			name:           "Should return true for 1",
+			money:          "1.00",
+			expectedResult: true,
+		},
+		{
+			name:           "Should return false for -1",
+			money:          "-1.00",
+			expectedResult: false,
+		},
+	}
+
+	for _, scenario := range scenarios {
+		t.Run(scenario.name, func(t *testing.T) {
+			m, _ := NewDecimalMoneyFromString(scenario.money)
 			assert.Equal(t, scenario.expectedResult, m.IsGreaterThanZero(), scenario.name)
 		})
 	}

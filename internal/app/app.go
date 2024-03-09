@@ -59,6 +59,15 @@ func (s *basicWalletService) Deposit(walletID string, amount string) error {
 		return err
 	}
 
+	moneyToDeposit, err := domain.NewDecimalMoneyFromString(amount)
+	if err != nil {
+		return err
+	}
+
+	if !moneyToDeposit.IsGreaterThanZero() {
+		return fmt.Errorf("invalid amount")
+	}
+
 	err = walletMoney.AddFromString(amount)
 	if err != nil {
 		return err
@@ -98,12 +107,21 @@ func (s *basicWalletService) Withdraw(walletID string, amount string) error {
 		return err
 	}
 
+	moneyToWithdraw, err := domain.NewDecimalMoneyFromString(amount)
+	if err != nil {
+		return err
+	}
+
+	if !moneyToWithdraw.IsGreaterThanZero() {
+		return fmt.Errorf("invalid amount")
+	}
+
 	err = walletMoney.SubtractFromString(amount)
 	if err != nil {
 		return err
 	}
 
-	if !walletMoney.IsGreaterThanZero() {
+	if !walletMoney.IsGreaterEqualThanZero() {
 		return fmt.Errorf("insufficient funds")
 	}
 

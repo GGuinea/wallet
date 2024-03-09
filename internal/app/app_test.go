@@ -94,6 +94,41 @@ func (s *AppTestSuite) TestShouldReturnErrorWhenWithdrawMoreThanBalance() {
 	s.NotNil(err)
 }
 
+func (s *AppTestSuite) TestShouldReturnErrorWhenWithdrawNegativeAmount() {
+	wallet, err := s.walletService.NewWallet()
+	s.Nil(err)
+
+	err = s.walletService.Deposit(wallet.ID, "100.00")
+	s.Nil(err)
+
+	err = s.walletService.Withdraw(wallet.ID, "-50.00")
+	s.NotNil(err)
+}
+
+func (s *AppTestSuite) TestShouldReturnErrorWhenDepositNegativeAmount() {
+	wallet, err := s.walletService.NewWallet()
+	s.Nil(err)
+
+	err = s.walletService.Deposit(wallet.ID, "-100.00")
+	s.NotNil(err)
+}
+
+func (s *AppTestSuite) TestShouldReturnErrorWhenDepositZeroAmount() {
+	wallet, err := s.walletService.NewWallet()
+	s.Nil(err)
+
+	err = s.walletService.Deposit(wallet.ID, "0.00")
+	s.NotNil(err)
+}
+
+func (s *AppTestSuite) TestShouldReturnErrorWhenWithdrawZeroAmount() {
+	wallet, err := s.walletService.NewWallet()
+	s.Nil(err)
+
+	err = s.walletService.Withdraw(wallet.ID, "0.00")
+	s.NotNil(err)
+}
+
 func TestWalletAppTestsSuite(t *testing.T) {
 	suite.Run(t, new(AppTestSuite))
 }
