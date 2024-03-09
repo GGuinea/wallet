@@ -92,3 +92,40 @@ func TestShouldSubtractMoneyProperly(t *testing.T) {
 		})
 	}
 }
+
+func TestShouldReturnMoneyFromString(t *testing.T) {
+	m, err := NewDecimalMoneyFromString("100.00")
+	assert.Nil(t, err)
+	assert.Equal(t, "100.00", m.GetAsStringWithDefaultPrecision())
+}
+
+func TestShouldReturnPropertlyIfMoneyIsGreaterEqualThanZero(t *testing.T) {
+	scenarios := []struct {
+		name           string
+		money          string
+		expectedResult bool
+	}{
+		{
+			name:           "Should return true for 0",
+			money:          "0.00",
+			expectedResult: true,
+		},
+		{
+			name:           "Should return true for 1",
+			money:          "1.00",
+			expectedResult: true,
+		},
+		{
+			name:           "Should return false for -1",
+			money:          "-1.00",
+			expectedResult: false,
+		},
+	}
+
+	for _, scenario := range scenarios {
+		t.Run(scenario.name, func(t *testing.T) {
+			m, _ := NewDecimalMoneyFromString(scenario.money)
+			assert.Equal(t, scenario.expectedResult, m.IsGreaterThanZero(), scenario.name)
+		})
+	}
+}
