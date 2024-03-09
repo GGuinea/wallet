@@ -1,8 +1,10 @@
 package adapters
 
 import (
+	"context"
 	"fmt"
 	"main/internal/domain"
+	"main/internal/entity"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -15,6 +17,8 @@ type WalletPostgresRepoDeps struct {
 	ConnPool *pgxpool.Pool
 }
 
+var insertWalletQuery = `INSERT INTO wallet (id, balance) VALUES ($1, $2)`
+
 func NewWalletPostgresRepo(deps *WalletPostgresRepoDeps) (*WalletPostgresRepo, error) {
 	if deps == nil {
 		return nil, fmt.Errorf("WalletPostgresRepoDeps is required")
@@ -25,15 +29,32 @@ func NewWalletPostgresRepo(deps *WalletPostgresRepoDeps) (*WalletPostgresRepo, e
 	}, nil
 }
 
-func (wpr *WalletPostgresRepo) SaveWallet(wallet *domain.Wallet) error {
+func (wpr *WalletPostgresRepo) SaveWallet(wallet *entity.WalletEntity) error {
+	ctx := context.Background()
+	tx, err := wpr.ConnPool.Begin(ctx)
+	if err != nil {
+		return err
+	}
+
+	_, err = tx.Exec(ctx, insertWalletQuery, wallet.ID, wallet.Balance)
+	if err != nil {
+		tx.Rollback(ctx)
+		return err
+	}
+
+	err = tx.Commit(ctx)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
-func (wpr *WalletPostgresRepo) GetWalletByID(id string) (*domain.Wallet, error) {
+func (wpr *WalletPostgresRepo) GetWalletByID(id string) (*entity.WalletEntity, error) {
 	return nil, nil
 }
 
-func (wpr *WalletPostgresRepo) UpdateWalletBalance(wallet *domain.Wallet, entry *domain.Entry) error {
+func (wpr *WalletPostgresRepo) UpdateWalletBalance(wallet *entity.WalletEntity, entry *domain.Entry) error {
 	return nil
 }
 

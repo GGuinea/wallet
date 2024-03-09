@@ -2,6 +2,7 @@ package app
 
 import (
 	"main/internal/domain"
+	"main/internal/entity"
 	"main/internal/ports"
 	"main/pkg"
 )
@@ -18,11 +19,18 @@ func NewWalletService(walletRepo ports.WalletRepository, idGen pkg.UUIDGenerator
 	}
 }
 
-func (s *basicWalletService) NewWallet() *domain.Wallet {
-	return &domain.Wallet{
+func (s *basicWalletService) NewWallet() (*domain.Wallet, error) {
+	newWallet := domain.Wallet{
 		ID:      s.idGen.Generate(),
 		Balance: domain.NewDecimalMoney(),
 	}
+
+	err := s.walletRepo.SaveWallet(entity.WalletEntityFromDomain(&newWallet))
+	if err != nil {
+		return nil, err
+	}
+
+	return &newWallet, nil
 }
 
 func (s *basicWalletService) Deposit(walletID string, amount string) error {
