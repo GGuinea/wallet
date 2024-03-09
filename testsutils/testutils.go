@@ -13,11 +13,11 @@ func GetDbPool() *pgxpool.Pool {
 	pgConnStr := "postgres://postgres:postgres@localhost:5432/postgres"
 	pool, err := pgxpool.New(context.Background(), pgConnStr)
 	if err != nil {
+		fmt.Println(err)
 		panic(err)
 	}
 	return pool
 }
-
 
 func SetupDbForTests() {
 	testConfig := &config.DbConfig{

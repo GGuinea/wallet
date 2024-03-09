@@ -7,13 +7,20 @@ import (
 	"main/pkg"
 )
 
+type WalletService interface {
+	NewWallet() (*domain.Wallet, error)
+	Deposit(walletID string, amount string) error
+	Withdraw(walletID string, amount string) error
+	GetBalance(walletID string) (string, error)
+}
+
 type basicWalletService struct {
 	walletRepo ports.WalletRepository
 	idGen      pkg.UUIDGenerator
 }
 
-func NewWalletService(walletRepo ports.WalletRepository, idGen pkg.UUIDGenerator) basicWalletService {
-	return basicWalletService{
+func NewWalletService(walletRepo ports.WalletRepository, idGen pkg.UUIDGenerator) WalletService{
+	return &basicWalletService{
 		walletRepo: walletRepo,
 		idGen:      idGen,
 	}

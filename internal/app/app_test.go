@@ -6,14 +6,31 @@ import (
 	"main/testsutils"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/suite"
 )
 
-func TestShouldReturnNewWalletWithBalanceZero(t *testing.T) {
-	walletRepo, _ := adapters.NewWalletPostgresRepo(&adapters.WalletPostgresRepoDeps{ConnPool: testsutils.GetDbPool()})
-	walletService := NewWalletService(walletRepo, pkg.NewUUIDGenerator())
-	returnedWallet, err := walletService.NewWallet()
-	assert.Nil(t, err)
-	assert.NotNil(t, returnedWallet)
-	assert.Equal(t, "0.00", returnedWallet.Balance.GetAsStringWithDefaultPrecision())
+type AppTestSuite struct {
+	suite.Suite
+	walletService WalletService
+}
+
+func (suite *AppTestSuite) SetupTest() {
+	testsutils.SetupDbForTests()
+	walletRepo, err := adapters.NewWalletPostgresRepo(&adapters.WalletPostgresRepoDeps{ConnPool: testsutils.GetDbPool()})
+	if err != nil {
+		suite.T().Fatal(err)
+	}
+
+	suite.walletService = NewWalletService(walletRepo, pkg.NewUUIDGenerator())
+}
+
+func (s *AppTestSuite) TestShouldReturnNewWalletWithBalanceZero() {
+	returnedWallet, err := s.walletService.NewWallet()
+	s.Nil(err)
+	s.NotNil(returnedWallet)
+	s.Equal("0.00", returnedWallet.Balance.GetAsStringWithDefaultPrecision())
+}
+
+func TestWalletAppTestsSuite(t *testing.T) {
+	suite.Run(t, new(AppTestSuite))
 }
