@@ -1,12 +1,15 @@
 package entity
 
-import "main/internal/domain"
+import (
+	"main/internal/domain"
+	"time"
+)
 
 type WalletEntity struct {
-	ID        string `db:"id" validate:"required"`
-	Balance   string `db:"balance" validate:"required"`
-	CreatedAt string `db:"created_at"`
-	UpdatedAt string `db:"updated_at"`
+	ID        string `db:"id"`
+	Balance   string `db:"balance"`
+	CreatedAt time.Time `db:"created_at"`
+	UpdatedAt time.Time `db:"updated_at"`
 }
 
 func WalletEntityFromDomain(wallet *domain.Wallet) *WalletEntity {
