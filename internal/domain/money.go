@@ -3,8 +3,8 @@ package domain
 import "github.com/shopspring/decimal"
 
 type Money interface {
-	AddFromString(money string) error
-	SubtractFromString(money string) error
+	Add(money Money) error
+	Subtract(money Money) error
 	GetAsStringWithDefaultPrecision() string
 	IsGreaterEqualThanZero() bool
 	IsGreaterThanZero() bool
@@ -28,21 +28,13 @@ func NewDecimalMoneyFromString(money string) (*DecimalMoney, error) {
 
 const defaultPrecision = 2
 
-func (m *DecimalMoney) AddFromString(money string) error {
-	amount, err := decimal.NewFromString(money)
-	if err != nil {
-		return  err
+func (m *DecimalMoney) Subtract(money Money) error {
+	decimalMoney, ok := money.(*DecimalMoney)
+	if !ok {
+		return nil
 	}
-	m.amount = m.amount.Add(amount)
-	return nil
-}
 
-func (m *DecimalMoney) SubtractFromString(money string) error {
-	amount, err := decimal.NewFromString(money)
-	if err != nil {
-		return err
-	}
-	m.amount = m.amount.Sub(amount)
+	m.amount = m.amount.Sub(decimalMoney.amount)
 	return nil
 }
 
@@ -56,4 +48,14 @@ func (m *DecimalMoney) IsGreaterEqualThanZero() bool {
 
 func (m *DecimalMoney) IsGreaterThanZero() bool {
 	return m.amount.IsPositive()
+}
+
+func (m *DecimalMoney) Add(money Money) error {
+	decimalMoney, ok := money.(*DecimalMoney)
+	if !ok {
+		return nil
+	}
+
+	m.amount = m.amount.Add(decimalMoney.amount)
+	return nil
 }

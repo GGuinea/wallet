@@ -48,6 +48,15 @@ func (s *basicWalletService) NewWallet() (*domain.Wallet, error) {
 }
 
 func (s *basicWalletService) Deposit(walletID string, amount string) error {
+	moneyToDeposit, err := domain.NewDecimalMoneyFromString(amount)
+	if err != nil {
+		return err
+	}
+
+	if !moneyToDeposit.IsGreaterThanZero() {
+		return fmt.Errorf("invalid amount")
+	}
+
 	walletBalance, err := s.walletRepo.GetWalletByID(walletID)
 	if err != nil {
 		return err
@@ -59,16 +68,7 @@ func (s *basicWalletService) Deposit(walletID string, amount string) error {
 		return err
 	}
 
-	moneyToDeposit, err := domain.NewDecimalMoneyFromString(amount)
-	if err != nil {
-		return err
-	}
-
-	if !moneyToDeposit.IsGreaterThanZero() {
-		return fmt.Errorf("invalid amount")
-	}
-
-	err = walletMoney.AddFromString(amount)
+	err = walletMoney.Add(moneyToDeposit)
 	if err != nil {
 		return err
 	}
@@ -97,6 +97,15 @@ func (s *basicWalletService) Deposit(walletID string, amount string) error {
 }
 
 func (s *basicWalletService) Withdraw(walletID string, amount string) error {
+	moneyToWithdraw, err := domain.NewDecimalMoneyFromString(amount)
+	if err != nil {
+		return err
+	}
+
+	if !moneyToWithdraw.IsGreaterThanZero() {
+		return fmt.Errorf("invalid amount")
+	}
+
 	walletBalance, err := s.walletRepo.GetWalletByID(walletID)
 	if err != nil {
 		return err
@@ -107,16 +116,7 @@ func (s *basicWalletService) Withdraw(walletID string, amount string) error {
 		return err
 	}
 
-	moneyToWithdraw, err := domain.NewDecimalMoneyFromString(amount)
-	if err != nil {
-		return err
-	}
-
-	if !moneyToWithdraw.IsGreaterThanZero() {
-		return fmt.Errorf("invalid amount")
-	}
-
-	err = walletMoney.SubtractFromString(amount)
+	err = walletMoney.Subtract(moneyToWithdraw)
 	if err != nil {
 		return err
 	}
