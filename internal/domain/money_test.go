@@ -12,6 +12,11 @@ func TestShouldReturnMoneyFromString(t *testing.T) {
 	assert.Equal(t, "100.00", m.GetAsStringWithDefaultPrecision())
 }
 
+func TestShouldThrowErrorWhenParsingInvalidMoney(t *testing.T) {
+	_, err := NewDecimalMoneyFromString("invalid")
+	assert.NotNil(t, err)
+}
+
 func TestShouldReturnPropertlyIfMoneyIsGreaterEqualThanZero(t *testing.T) {
 	scenarios := []struct {
 		name           string
