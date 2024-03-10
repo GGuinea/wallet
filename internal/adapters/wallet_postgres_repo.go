@@ -45,7 +45,10 @@ func (wpr *WalletPostgresRepo) SaveWallet(wallet *entity.WalletEntity) error {
 
 	_, err = tx.Exec(ctx, insertWalletQuery, wallet.ID, wallet.Balance)
 	if err != nil {
-		tx.Rollback(ctx)
+		rollbackError := tx.Rollback(ctx)
+		if rollbackError != nil {
+			return fmt.Errorf("failed to save wallet %w and rollback failed: %w", err, rollbackError)
+		}
 		return err
 	}
 
@@ -100,25 +103,37 @@ func (wpr *WalletPostgresRepo) UpdateWalletBalance(wallet *entity.WalletEntity, 
 	err = tx.QueryRow(ctx, getWalletByIDQuery, wallet.ID).Scan(&savedWallet.ID, &savedWallet.Balance, &savedWallet.CreatedAt, &savedWallet.UpdatedAt)
 
 	if err != nil {
-		tx.Rollback(ctx)
+		rollbackError := tx.Rollback(ctx)
+		if rollbackError != nil {
+			return fmt.Errorf("failed to query wallet %w and rollback failed: %w", err, rollbackError)
+		}
 		return err
 	}
 
 	res, err := tx.Exec(ctx, `UPDATE wallet SET balance = $1, updated_at = $2 WHERE id = $3 AND updated_at = $4 AND balance = $5`, wallet.Balance, wallet.UpdatedAt, wallet.ID, savedWallet.UpdatedAt, savedWallet.Balance)
 	if err != nil {
-		tx.Rollback(ctx)
+		rollbackError := tx.Rollback(ctx)
+		if rollbackError != nil {
+			return fmt.Errorf("failed to update wallet %w and rollback failed: %w", err, rollbackError)
+		}
 		return err
 	}
 
 	if res.RowsAffected() == 0 {
-		tx.Rollback(ctx)
+		rollbackError := tx.Rollback(ctx)
+		if rollbackError != nil {
+			return fmt.Errorf("wallet balance update in transaction failed and rollback failed: %w", rollbackError)
+		}
 		return fmt.Errorf("wallet balance update failed")
 	}
 
 	_, err = tx.Exec(ctx, insertEntryQuery, entry.ID, entry.WalletID, entry.Type, entry.Amount, entry.BalanceAfter, entry.CreatedAt)
 
 	if err != nil {
-		tx.Rollback(ctx)
+		rollbackError := tx.Rollback(ctx)
+		if rollbackError != nil {
+			return fmt.Errorf("failed to save entry log: %w and rollback failed: %w", err, rollbackError)
+		}
 		return err
 	}
 
