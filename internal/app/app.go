@@ -3,6 +3,7 @@ package app
 import (
 	"fmt"
 	"main/internal/domain"
+	"main/internal/domain/errors"
 	"main/internal/entity"
 	"main/internal/ports"
 	"main/pkg"
@@ -54,7 +55,7 @@ func (s *basicWalletService) Deposit(walletID string, amount string) error {
 	}
 
 	if !moneyToDeposit.IsGreaterThanZero() {
-		return fmt.Errorf("invalid amount")
+		return errors.NewInvalidAmountError(fmt.Sprintf("invalid amount: %s", amount))
 	}
 
 	walletBalance, err := s.walletRepo.GetWalletByID(walletID)
@@ -103,7 +104,7 @@ func (s *basicWalletService) Withdraw(walletID string, amount string) error {
 	}
 
 	if !moneyToWithdraw.IsGreaterThanZero() {
-		return fmt.Errorf("invalid amount")
+		return errors.NewInvalidAmountError(fmt.Sprintf("invalid amount: %s", amount))
 	}
 
 	walletBalance, err := s.walletRepo.GetWalletByID(walletID)
@@ -122,7 +123,7 @@ func (s *basicWalletService) Withdraw(walletID string, amount string) error {
 	}
 
 	if !walletMoney.IsGreaterEqualThanZero() {
-		return fmt.Errorf("insufficient funds")
+		return errors.NewInsufficientFundsError(fmt.Sprintf("insufficient funds: %s", walletMoney.GetAsStringWithDefaultPrecision()))
 	}
 
 	entryEnity := &entity.EntryEntity{
