@@ -9,7 +9,18 @@ import (
 )
 
 func GetDbPool(ctx context.Context, config *config.DbConfig) (*pgxpool.Pool, error) {
-	return pgxpool.New(ctx, buildConnectionString(config))
+	pool, err := pgxpool.New(ctx, buildConnectionString(config))
+	if err != nil {
+		return nil, err
+
+	}
+
+	err = pool.Ping(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return pool, nil
 }
 
 func buildConnectionString(dbConfig *config.DbConfig) string {
