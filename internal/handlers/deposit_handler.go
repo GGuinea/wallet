@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"log"
 	"main/internal/app"
 	"main/internal/handlers/model"
 	"net/http"
@@ -26,8 +27,9 @@ func (h *depositHandler) ServeHTTP(c *gin.Context) {
 	var depositRequest model.DepositRequestDTO
 
 	if err := c.BindJSON(&depositRequest); err != nil {
+		log.Println(err)
 		errorResponse := model.ErrorResponseDTO{
-			Message: err.Error(),
+			Message: "invalid request body",
 		}
 		c.JSON(http.StatusBadRequest, errorResponse)
 		return
@@ -35,8 +37,9 @@ func (h *depositHandler) ServeHTTP(c *gin.Context) {
 
 	err := h.walletService.Deposit(id, depositRequest.Amount)
 	if err != nil {
+		log.Println(err)
 		errorResponse := model.ErrorResponseDTO{
-			Message: err.Error(),
+			Message: "cannot deposit",
 		}
 		c.JSON(http.StatusBadRequest, errorResponse)
 		return

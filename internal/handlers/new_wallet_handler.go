@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"log"
 	"main/internal/app"
 	"main/internal/handlers/model"
 	"net/http"
@@ -19,10 +20,11 @@ func NewNewWalletHandler(walletService app.WalletService) *newWalletHandler {
 func (h *newWalletHandler) ServeHTTP(c *gin.Context) {
 	wallet, err := h.walletService.NewWallet()
 	if err != nil {
+		log.Println(err)
 		errorResponse := model.ErrorResponseDTO{
-			Message: err.Error(),
+			Message: "cannot create wallet",
 		}
-		c.JSON(http.StatusBadRequest, errorResponse)
+		c.JSON(http.StatusInternalServerError, errorResponse)
 		return
 	}
 
@@ -31,5 +33,5 @@ func (h *newWalletHandler) ServeHTTP(c *gin.Context) {
 		Balance: wallet.Balance.GetAsStringWithDefaultPrecision(),
 	}
 
-	c.JSON(http.StatusOK, response)
+	c.JSON(http.StatusCreated, response)
 }

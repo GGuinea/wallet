@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"log"
 	"main/internal/app"
 	"main/internal/handlers/model"
 	"net/http"
@@ -29,8 +30,9 @@ func (h *withdrawHandler) ServeHTTP(c *gin.Context) {
 	defer body.Close()
 	var withdrawRequestDTO model.WithdrawRequestDTO
 	if err := c.BindJSON(&withdrawRequestDTO); err != nil {
+		log.Println(err)
 		errorResponse := model.ErrorResponseDTO{
-			Message: err.Error(),
+			Message: "invalid request body",
 		}
 		c.JSON(http.StatusBadRequest, errorResponse)
 		return
@@ -38,8 +40,9 @@ func (h *withdrawHandler) ServeHTTP(c *gin.Context) {
 
 	err := h.walletService.Withdraw(id, withdrawRequestDTO.Amount)
 	if err != nil {
+		log.Println(err)
 		errorResponse := model.ErrorResponseDTO{
-			Message: err.Error(),
+			Message: "cannot withdraw",
 		}
 		c.JSON(http.StatusBadRequest, errorResponse)
 		return

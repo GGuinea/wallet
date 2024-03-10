@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"log"
 	"main/internal/app"
 	"main/internal/handlers/model"
 	"net/http"
@@ -28,8 +29,9 @@ func (h *getWalletHandler) ServeHTTP(c *gin.Context) {
 
 	balance, err := h.walletService.GetBalance(id)
 	if err != nil {
+		log.Println(err)
 		errorResponse := model.ErrorResponseDTO{
-			Message: err.Error(),
+			Message: "cannot get balance",
 		}
 		c.JSON(http.StatusBadRequest, errorResponse)
 		return
