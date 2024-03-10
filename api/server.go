@@ -49,8 +49,6 @@ func NewGinHttpServer(deps *GinServerDeps) (*GinHttpServer, error) {
 	walletFacade := handlers.NewWalletHandlersFacade(walletService)
 	router := getRouter(walletFacade)
 
-	intializeWalletHandlers(router, walletFacade)
-
 	return &GinHttpServer{
 		serverConfig: deps.Config.ServerConfig,
 		server: &http.Server{
@@ -88,4 +86,5 @@ func intializeWalletHandlers(router *gin.Engine, facade *handlers.WalletHandlers
 	walletGroup.PUT("/:id/balance/withdraw", facade.WithdrawHandler())
 	walletGroup.GET("/:id/balance", facade.GetWalletBalanceHandler())
 	walletGroup.GET("/:id", facade.GetWalletHandler())
+	walletGroup.GET("/:id/entries", facade.GetWalletEntriesHandler())
 }

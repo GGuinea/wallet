@@ -7,6 +7,7 @@ import (
 	"main/internal/app"
 	"main/internal/domain"
 	"main/internal/handlers"
+	"main/internal/handlers/model"
 	"main/pkg"
 	"main/testsutils"
 	"net/http"
@@ -216,6 +217,37 @@ func (s *ServerTestSuite) TestShoudlReturn400WhenDepositingInvalidAmount() {
 	depositRecorder := httptest.NewRecorder()
 	s.router.ServeHTTP(depositRecorder, depositRequest)
 	s.Equal(http.StatusBadRequest, depositRecorder.Code)
+}
+
+func (s *ServerTestSuite) TestShoudlReturnEntriesForWallet() {
+	req, _ := http.NewRequest("POST", "/api/v1/wallets", nil)
+	w := httptest.NewRecorder()
+	s.router.ServeHTTP(w, req)
+	s.Equal(http.StatusCreated, w.Code)
+	var wallet *domain.Wallet
+	json.Unmarshal(w.Body.Bytes(), &wallet)
+
+	depositBody := `{"amount":"100.00"}`
+	body := bytes.NewBufferString(depositBody)
+	depositRequest, _ := http.NewRequest("PUT", "/api/v1/wallets/"+wallet.ID+"/balance/deposit", body)
+	depositRecorder := httptest.NewRecorder()
+	s.router.ServeHTTP(depositRecorder, depositRequest)
+	s.Equal(http.StatusOK, depositRecorder.Code)
+
+	withdrawBody := `{"amount":"50.00"}`
+	withdrawBodyBuffer := bytes.NewBufferString(withdrawBody)
+	withdrawRequest, _ := http.NewRequest("PUT", "/api/v1/wallets/"+wallet.ID+"/balance/withdraw", withdrawBodyBuffer)
+	withdrawRecorder := httptest.NewRecorder()
+	s.router.ServeHTTP(withdrawRecorder, withdrawRequest)
+	s.Equal(http.StatusOK, withdrawRecorder.Code)
+
+	entriesRequest, _ := http.NewRequest("GET", "/api/v1/wallets/"+wallet.ID+"/entries", nil)
+	entriesRecorder := httptest.NewRecorder()
+	s.router.ServeHTTP(entriesRecorder, entriesRequest)
+	s.Equal(http.StatusOK, entriesRecorder.Code)
+	var entityResponse *model.WalletEntriesResponseDTO
+	json.Unmarshal(entriesRecorder.Body.Bytes(), &entityResponse)
+	s.Equal(2, len(entityResponse.Entries))
 }
 
 func TestRoutesTestSuite(t *testing.T) {

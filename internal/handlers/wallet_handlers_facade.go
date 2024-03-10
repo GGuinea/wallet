@@ -12,6 +12,7 @@ type WalletHandlersFacade struct {
 	getWalletBalanceHandler *getWalletBalanceHandler
 	newWalletHandler *newWalletHandler
 	getWalletHandler *getWalletHandler
+	getWalletEntriesHandler *getWalletEntriesHandler
 }
 
 func NewWalletHandlersFacade(walletService app.WalletService) *WalletHandlersFacade {
@@ -21,6 +22,7 @@ func NewWalletHandlersFacade(walletService app.WalletService) *WalletHandlersFac
 		getWalletBalanceHandler: NewGetWalletBalanceHandler(walletService),
 		newWalletHandler: NewNewWalletHandler(walletService),
 		getWalletHandler: NewGetWalletHandler(walletService),
+		getWalletEntriesHandler: NewGetWalletEntriesHandler(walletService),
 	}
 }
 
@@ -42,4 +44,8 @@ func (f *WalletHandlersFacade) NewWalletHandler() func(c *gin.Context) {
 
 func (f *WalletHandlersFacade) GetWalletHandler() func(c *gin.Context) {
 	return f.getWalletHandler.ServeHTTP
+}
+
+func (f *WalletHandlersFacade) GetWalletEntriesHandler() func(c *gin.Context) {
+	return f.getWalletEntriesHandler.ServeHTTP
 }

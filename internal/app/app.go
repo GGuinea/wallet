@@ -16,6 +16,7 @@ type WalletService interface {
 	Withdraw(walletID string, amount string) error
 	GetBalance(walletID string) (string, error)
 	GetWalletByID(walletID string) (*domain.Wallet, error)
+	GetWalletEntries(walletID string) ([]*domain.Entry, error)
 }
 
 type basicWalletService struct {
@@ -81,6 +82,7 @@ func (s *basicWalletService) Deposit(walletID string, amount string) error {
 		Type:         depositType,
 		Amount:       amount,
 		BalanceAfter: walletMoney.GetAsStringWithDefaultPrecision(),
+		CreatedAt:    time.Now(),
 	}
 
 	newWalletEntity := &entity.WalletEntity{
@@ -133,6 +135,7 @@ func (s *basicWalletService) Withdraw(walletID string, amount string) error {
 		Type:         withdrawType,
 		Amount:       amount,
 		BalanceAfter: walletMoney.GetAsStringWithDefaultPrecision(),
+		CreatedAt:    time.Now(),
 	}
 
 	newWalletEntity := &entity.WalletEntity{
@@ -163,6 +166,37 @@ func (s *basicWalletService) GetWalletByID(walletID string) (*domain.Wallet, err
 		return nil, err
 	}
 	return domainWalletFromEntityWallet(walletEntity)
+}
+
+func (s *basicWalletService) GetWalletEntries(walletID string) ([]*domain.Entry, error) {
+	entries, err := s.walletRepo.GetEntriesByWalletID(walletID)
+	if err != nil {
+		return nil, err
+	}
+	return domainEntriesFromEntityEntries(entries)
+}
+
+func domainEntriesFromEntityEntries(entries []*entity.EntryEntity) ([]*domain.Entry, error) {
+	domainEntries := make([]*domain.Entry, 0, len(entries))
+	for _, entry := range entries {
+		amount, err := domain.NewDecimalMoneyFromString(entry.Amount)
+		if err != nil {
+			return nil, err
+		}
+		balanceAfter, err := domain.NewDecimalMoneyFromString(entry.BalanceAfter)
+		if err != nil {
+			return nil, err
+		}
+		domainEntries = append(domainEntries, &domain.Entry{
+			ID:           entry.ID,
+			WalletID:     entry.WalletID,
+			Type:         entry.Type,
+			Amount:       amount,
+			BalanceAfter: balanceAfter,
+			CreatedAt:    entry.CreatedAt,
+		})
+	}
+	return domainEntries, nil
 }
 
 func domainWalletFromEntityWallet(walletEntity *entity.WalletEntity) (*domain.Wallet, error) {
