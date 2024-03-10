@@ -80,5 +80,6 @@ func intializeWalletHandlers(router *gin.Engine, facade *handlers.WalletHandlers
 	walletGroup.POST("", facade.NewWalletHandler())
 	walletGroup.PUT("/:id/balance/deposit", facade.DepositHandler())
 	walletGroup.PUT("/:id/balance/withdraw", facade.WithdrawHandler())
+	walletGroup.GET("/:id/balance", facade.GetWalletBalanceHandler())
 	walletGroup.GET("/:id", facade.GetWalletHandler())
 }

@@ -15,6 +15,7 @@ type WalletService interface {
 	Deposit(walletID string, amount string) error
 	Withdraw(walletID string, amount string) error
 	GetBalance(walletID string) (string, error)
+	GetWalletByID(walletID string) (*domain.Wallet, error)
 }
 
 type basicWalletService struct {
@@ -156,6 +157,14 @@ func (s *basicWalletService) GetBalance(walletID string) (string, error) {
 	return balance, nil
 }
 
+func (s *basicWalletService) GetWalletByID(walletID string) (*domain.Wallet, error) {
+	walletEntity, err := s.walletRepo.GetWalletByID(walletID)
+	if err != nil {
+		return nil, err
+	}
+	return domainWalletFromEntityWallet(walletEntity)
+}
+
 func domainWalletFromEntityWallet(walletEntity *entity.WalletEntity) (*domain.Wallet, error) {
 	balance, err := domain.NewDecimalMoneyFromString(walletEntity.Balance)
 	if err != nil {
@@ -164,5 +173,7 @@ func domainWalletFromEntityWallet(walletEntity *entity.WalletEntity) (*domain.Wa
 	return &domain.Wallet{
 		ID:      walletEntity.ID,
 		Balance: balance,
+		CreatedAt: walletEntity.CreatedAt,
+		UpdatedAt: walletEntity.UpdatedAt,
 	}, nil
 }

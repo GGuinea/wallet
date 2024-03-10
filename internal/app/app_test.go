@@ -188,6 +188,21 @@ func (s *AppTestSuite) TestShouldHandleConcurrentWithdraws() {
 	s.True(money.IsGreaterEqualThanZero())
 }
 
+func (s *AppTestSuite) TestShoudlReturnWalletById() {
+	wallet, err := s.walletService.NewWallet()
+	s.Nil(err)
+
+	returnedWallet, err := s.walletService.GetWalletByID(wallet.ID)
+	s.Nil(err)
+	s.Equal(wallet.ID, returnedWallet.ID)
+	s.Equal(wallet.Balance.GetAsStringWithDefaultPrecision(), returnedWallet.Balance.GetAsStringWithDefaultPrecision())
+}
+
+func (s *AppTestSuite) TestShoudlReturnErrorWhenWalletByIdNotFound() {
+	_, err := s.walletService.GetWalletByID("invalid")
+	s.NotNil(err)
+}
+
 func TestWalletAppTestsSuite(t *testing.T) {
 	suite.Run(t, new(AppTestSuite))
 }
