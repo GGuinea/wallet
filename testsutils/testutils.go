@@ -24,10 +24,26 @@ func SetupDbForTests() {
 		User:     "postgres",
 		Password: "postgres",
 		DbName:   "postgres",
-
 	}
 	err := migrations.MigrateGlobal(context.Background(), testConfig)
 	if err != nil {
 		panic(err)
+	}
+}
+
+func ConfigForTests() *config.Config {
+	return &config.Config{
+		DbConfig: &config.DbConfig{
+			Host:     "localhost",
+			Port:     "5432",
+			User:     "postgres",
+			Password: "postgres",
+			DbName:   "postgres",
+		},
+		ServerConfig: &config.ServerConfig{
+			Host:             "localhost",
+			Port:             "8080",
+			ShoutdownTimeout: 5,
+		},
 	}
 }

@@ -110,7 +110,8 @@ func (wpr *WalletPostgresRepo) UpdateWalletBalance(wallet *entity.WalletEntity, 
 		return err
 	}
 
-	res, err := tx.Exec(ctx, `UPDATE wallet SET balance = $1, updated_at = $2 WHERE id = $3 AND updated_at = $4 AND balance = $5`, wallet.Balance, wallet.UpdatedAt, wallet.ID, savedWallet.UpdatedAt, savedWallet.Balance)
+	res, err := tx.Exec(ctx, `UPDATE wallet SET balance = $1, updated_at = $2 WHERE id = $3 AND updated_at = $4 AND balance = $5`,
+		wallet.Balance, wallet.UpdatedAt, wallet.ID, savedWallet.UpdatedAt, savedWallet.Balance)
 	if err != nil {
 		rollbackError := tx.Rollback(ctx)
 		if rollbackError != nil {

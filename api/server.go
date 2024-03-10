@@ -34,21 +34,20 @@ func NewGinHttpServer(deps *GinServerDeps) (*GinHttpServer, error) {
 	}
 	ctx := context.Background()
 	dbPool, err := conn.GetDbPool(ctx, deps.Config.DbConfig)
-
-	router := gin.Default()
-
-	router.GET("/api/v1/health", healthHandler)
-
 	if err != nil {
 		return nil, err
 	}
+
 
 	walletRepo, err := adapters.NewWalletPostgresRepo(&adapters.WalletPostgresRepoDeps{ConnPool: dbPool})
 	if err != nil {
 		return nil, err
 	}
+
+
 	walletService := app.NewWalletService(walletRepo, pkg.NewUUIDGenerator())
 	walletFacade := handlers.NewWalletHandlersFacade(walletService)
+	router := getRouter(walletFacade)
 
 	intializeWalletHandlers(router, walletFacade)
 
@@ -61,12 +60,19 @@ func NewGinHttpServer(deps *GinServerDeps) (*GinHttpServer, error) {
 	}, nil
 }
 
+func getRouter(walletFacade *handlers.WalletHandlersFacade) *gin.Engine {
+	router := gin.Default()
+	router.GET("/api/v1/health", healthHandler)
+	intializeWalletHandlers(router, walletFacade)
+	return router
+}
+
 func (s *GinHttpServer) Start() error {
 	return s.server.ListenAndServe()
 }
 
 func (s *GinHttpServer) GracefulStop(ctx context.Context) error {
-	return s.server.Shutdown(context.Background())
+	return s.server.Shutdown(ctx)
 }
 
 func healthHandler(c *gin.Context) {
