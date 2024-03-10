@@ -16,11 +16,12 @@ import (
 
 type HttpServer interface {
 	Start() error
+	GracefulStop(context context.Context) error
 }
 
 type GinHttpServer struct {
 	serverConfig *config.ServerConfig
-	router       *gin.Engine
+	server      *http.Server
 }
 
 type GinServerDeps struct {
@@ -53,12 +54,19 @@ func NewGinHttpServer(deps *GinServerDeps) (*GinHttpServer, error) {
 
 	return &GinHttpServer{
 		serverConfig: deps.Config.ServerConfig,
-		router:       router,
+		server: &http.Server{
+			Addr:    fmt.Sprintf(":%s", deps.Config.ServerConfig.Port),
+			Handler: router,
+		},
 	}, nil
 }
 
 func (s *GinHttpServer) Start() error {
-	return s.router.Run(fmt.Sprintf(":%s", s.serverConfig.Port))
+	return s.server.ListenAndServe()
+}
+
+func (s *GinHttpServer) GracefulStop(ctx context.Context) error {
+	return s.server.Shutdown(context.Background())
 }
 
 func healthHandler(c *gin.Context) {

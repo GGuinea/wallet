@@ -23,6 +23,7 @@ type DbConfig struct {
 type ServerConfig struct {
 	Host string
 	Port string
+	ShoutdownTimeout int
 }
 
 func buildDbconfig() *DbConfig {
@@ -39,5 +40,6 @@ func buildServerConfig() *ServerConfig {
 	return &ServerConfig{
 		Host: "localhost",
 		Port: "8080",
+		ShoutdownTimeout: 5,
 	}
 }
